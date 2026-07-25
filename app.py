@@ -15,7 +15,6 @@ st.markdown(
     "Unggah file **Shapefile dalam format `.zip`** (yang berisi file `.shp`, `.shx`, `.dbf`, dll.) untuk mengekstrak titik-titik koordinat (Latitude, Longitude) dari setiap poligon."
 )
 
----
 
 # 1. Unggah File ZIP Shapefile
 uploaded_file = st.file_uploader(
