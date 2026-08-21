@@ -1,6 +1,4 @@
 import io
-import os
-import zipfile
 import geopandas as gpd
 import pandas as pd
 import streamlit as st
@@ -18,7 +16,7 @@ st.markdown(
 
 st.divider()
 
-# 1. Atur accept_multiple_files=True
+# 1. Input pengunggahan file
 uploaded_files = st.file_uploader(
     "Pilih satu atau beberapa file ZIP Shapefile",
     type=["zip"],
@@ -26,7 +24,7 @@ uploaded_files = st.file_uploader(
 )
 
 if uploaded_files:
-  # Opsi gabungkan sheet atau terpisah
+  # Opsi format output
   combine_option = st.radio(
       "Pilih format output Excel:",
       ["Satu File Excel (Tiap Shapefile beda Sheet)", "Satu Sheet Digabung"],
@@ -61,24 +59,26 @@ if uploaded_files:
             for poly_idx, poly in enumerate(polygons):
               exterior_coords = list(poly.exterior.coords)
 
-            for vertex_idx, pt in enumerate(exterior_coords):
-              lon, lat = pt[0], pt[1]  
-                
-              row_data = {
-                  "Source_File": file_name,
-                  "Polygon_ID": idx,
-                  "SubPolygon_ID": poly_idx,
-                  "Vertex_Sequence": vertex_idx,
-                  "Latitude": lat,
-                  "Longitude": lon,
+              for vertex_idx, pt in enumerate(exterior_coords):
+                # pt[0] = Longitude, pt[1] = Latitude (aman untuk 2D & 3D)
+                lon, lat = pt[0], pt[1]
+
+                row_data = {
+                    "Source_File": file_name,
+                    "Polygon_ID": idx,
+                    "SubPolygon_ID": poly_idx,
+                    "Vertex_Sequence": vertex_idx,
+                    "Latitude": lat,
+                    "Longitude": lon,
                 }
+                # Indentasi di bawah ini diselaraskan dengan aman:
                 row_data.update(attributes)
                 rows.append(row_data)
 
         df_coords = pd.DataFrame(rows)
-        all_dfs[file_name[:30]] = (
-            df_coords  # Nama sheet Excel maks 31 karakter
-        )
+        # Nama sheet Excel maksimal 31 karakter
+        sheet_key = file_name[:30]
+        all_dfs[sheet_key] = df_coords
         combined_rows.extend(rows)
 
       except Exception as e:
